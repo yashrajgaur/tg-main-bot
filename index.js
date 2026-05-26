@@ -71,9 +71,7 @@ function getMainMenu(lang) {
                 keyboard: [
                     ['🎁 वेलकम बोनस', '📝 रजिस्टर कैसे करें'],
                     ['💳 डिपॉजिट कैसे करें', '🏷 प्रोमो कोड एक्टिवेट करें'],
-                    ['🤝 दोस्तों को आमंत्रित करें'], 
-                    ['🎮 गेम्स और ऑफर्स', '🌐 भाषा (Language)'],
-                    ['📞 सहायता (Support)']
+                    ['🌐 भाषा (Language)', '📞 सहायता (Support)']
                 ],
                 resize_keyboard: true,
                 is_persistent: true
@@ -85,9 +83,7 @@ function getMainMenu(lang) {
             keyboard: [
                 ['🎁 Welcome Bonus', '📝 How to Register'],
                 ['💳 How to Deposit', '🏷 Activate Promo Code'],
-                ['🤝 Invite Friends'], 
-                ['🎮 Games & Offers', '🌐 Language'],
-                ['📞 Support']
+                ['🌐 Language', '📞 Support']
             ],
             resize_keyboard: true,
             is_persistent: true
@@ -285,18 +281,6 @@ bot.on('message', async (msg) => {
                 bot.sendMessage(chatId, langPrompt, langKeyboard);
                 break;
 
-            case '🤝 Invite Friends':
-            case '🤝 दोस्तों को आमंत्रित करें':
-                const refLink = `https://t.me/${botUsername}?start=${chatId}`;
-                const referralBalance = user.referralsCount * 20; 
-                
-                const refMsg = lang === 'hi'
-                    ? `🤝 *दोस्तों को आमंत्रित करें और पैसे कमाएं*\n\nअपने दोस्तों के साथ अपना लिंक शेयर करें। जब वे बॉट स्टार्ट करेंगे, तो यह यहाँ ट्रैक हो जाएगा!\n\n💸 *रेफरल इनाम:*\n• आपको हर इनवाइट पर *20 INR* मिलेंगे।\n• जब आपके रेफरल अकाउंट में *1000 INR* हो जाएंगे, तो आप इसे अपने 1x अकाउंट में बोनस के रूप में निकाल सकते हैं!\n\n👥 *आपके रेफरल:* ${user.referralsCount} यूज़र्स\n💰 *आपका बैलेंस:* ${referralBalance} INR\n\n🔗 *आपका अनोखा लिंक:*\n\`${refLink}\`\n\n*(कॉपी करने के लिए ऊपर दिए गए लिंक पर टैप करें!)*`
-                    : `🤝 *Invite Friends & Track Referrals*\n\nShare your unique link with friends. When they start the bot, it will be tracked here!\n\n💸 *Referral Rewards:*\n• You get *20 INR* for every person you invite.\n• Once you reach *1000 INR* in your referral account, you can withdraw that amount to your 1x account as a Bonus!\n\n👥 *Your Referrals:* ${user.referralsCount} users\n💰 *Your Balance:* ${referralBalance} INR\n\n🔗 *Your Unique Link:*\n\`${refLink}\`\n\n*(Tap the link above to copy it!)*`;
-                
-                await bot.sendMessage(chatId, refMsg, { parse_mode: 'Markdown' });
-                break;
-
             case '📝 How to Register':
             case '📝 रजिस्टर कैसे करें':
                 const regText = lang === 'hi'
@@ -362,13 +346,13 @@ bot.on('message', async (msg) => {
                     : `⏳ *Welcome Bonus block is currently being updated.*\n\nRemember to use \`${PROMO_CODE}\` when registering!`, { parse_mode: 'Markdown' });
                 break;
 
-            case '🎮 Games & Offers':
-            case '🎮 गेम्स और ऑफर्स':
             case '📞 Support':
             case '📞 सहायता (Support)':
-                bot.sendMessage(chatId, lang === 'hi'
-                    ? `🚧 यह सेक्शन अभी निर्माणाधीन है। कृपया बाद में वापस आएं!`
-                    : `🚧 This section is under construction. Check back soon!`, { parse_mode: 'Markdown' });
+                const supportText = lang === 'hi'
+                    ? `📞 *सहायता (Support)*\n\nकिसी भी प्रश्न के लिए, कृपया हमसे संपर्क करें:\n📧 *सामान्य पूछताछ:* info-ind@1xbet-team.com\n🌍 *विश्वव्यापी समर्थन:* +44 127 325-69-87\n💬 *टेलीग्राम:* 1xBet Official Support\n\n🛠 *सपोर्ट टिकट कैसे खोलें (How to open a ticket):*\n1️⃣ 1xBet ऐप या वेबसाइट खोलें।\n2️⃣ मेनू (Menu) में जाएं और 'कस्टमर सपोर्ट' (Customer Support) चुनें।\n3️⃣ तुरंत सहायता के लिए 'चैट' (Chat) चुनें, या ऑपरेटर से बात करने के लिए 'कॉल बैक' (Callback) का अनुरोध करें।\n4️⃣ अपनी समस्या का स्पष्ट विवरण और अपना **अकाउंट आईडी (Account ID)** प्रदान करें।`
+                    : `📞 *Support*\n\nFor any questions, please contact us:\n📧 *General inquiries:* info-ind@1xbet-team.com\n🌍 *Worldwide support:* +44 127 325-69-87\n💬 *Telegram:* 1xBet Official Support\n\n🛠 *How to open a support ticket:*\n1️⃣ Open the 1xBet app or website.\n2️⃣ Go to the Menu and select 'Customer Support'.\n3️⃣ Choose 'Chat' for instant help, or request a 'Callback' to speak with an operator.\n4️⃣ Provide a clear description of your issue along with your **Account ID**.\n`;
+
+                bot.sendMessage(chatId, supportText, { parse_mode: 'Markdown' });
                 break;
 
             default:
