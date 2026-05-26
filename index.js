@@ -2,9 +2,26 @@ require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const mongoose = require('mongoose');
 const fs = require('fs');
-const path = require('path'); // Added path module
+const path = require('path');
+const express = require('express');
 
-// Define User Schema & Model (ADDED: language field)
+// ==========================================
+// DUMMY WEB SERVER FOR RENDER
+// ==========================================
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+    res.send('🤖 1x Helper Bot is alive and running!');
+});
+
+app.listen(port, () => {
+    console.log(`✅ Dummy web server is listening on port ${port}`);
+});
+
+// ==========================================
+// MONGODB SCHEMAS & MODELS
+// ==========================================
 const userSchema = new mongoose.Schema({
     telegramId: { type: Number, required: true, unique: true },
     firstName: String,
@@ -22,7 +39,7 @@ const User = mongoose.model('User', userSchema);
 // ==========================================
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { 
-    polling: false,
+    polling: false, // We will start polling manually after DB connects
     request: {
         agentOptions: {
             family: 4 
@@ -111,7 +128,6 @@ async function getOrCreateUser(msg, refId = null) {
                     { $inc: { referralsCount: 1 } }
                 );
                 
-                // Alert referrer in their preferred language if possible, defaulting to English here
                 bot.sendMessage(finalRefId, `🎉 *New Referral!* [${msg.from.first_name}](tg://user?id=${msg.from.id}) just joined the bot using your link!`, { parse_mode: 'Markdown' });
             } catch (err) {
                 console.error("Error updating inviter:", err);
@@ -198,7 +214,6 @@ bot.on('callback_query', async (query) => {
         let user = await User.findOne({ telegramId: userId });
         const lang = user ? user.language : 'en';
 
-        // Check Subscription Logic
         if (query.data === 'check_sub') {
             const subbed = await isSubscribed(userId);
             if (subbed) {
@@ -217,12 +232,11 @@ bot.on('callback_query', async (query) => {
             }
         }
 
-        // Language Selection Logic
         if (query.data.startsWith('set_lang_')) {
-            const newLang = query.data.replace('set_lang_', ''); // Extract 'en' or 'hi'
+            const newLang = query.data.replace('set_lang_', ''); 
             user = await User.findOneAndUpdate({ telegramId: userId }, { language: newLang }, { new: true });
             
-            bot.deleteMessage(chatId, query.message.message_id).catch(() => {}); // Remove inline keyboard
+            bot.deleteMessage(chatId, query.message.message_id).catch(() => {}); 
             
             const confirmMsg = newLang === 'hi' ? '✅ भाषा बदलकर हिन्दी कर दी गई है।' : '✅ Language changed to English.';
             bot.sendMessage(chatId, confirmMsg, getMainMenu(newLang));
@@ -256,12 +270,7 @@ bot.on('message', async (msg) => {
             }
         }
 
-        // ==========================================
-        // MAIN MENU SWITCH
-        // ==========================================
         switch (text) {
-            
-            // LANGUAGE MENU
             case '🌐 Language':
             case '🌐 भाषा (Language)':
                 const langPrompt = lang === 'hi' ? 'अपनी पसंदीदा भाषा चुनें:' : 'Choose your preferred language:';
@@ -276,20 +285,18 @@ bot.on('message', async (msg) => {
                 bot.sendMessage(chatId, langPrompt, langKeyboard);
                 break;
 
-            // INVITE FRIENDS
             case '🤝 Invite Friends':
             case '🤝 दोस्तों को आमंत्रित करें':
                 const refLink = `https://t.me/${botUsername}?start=${chatId}`;
                 const referralBalance = user.referralsCount * 20; 
                 
                 const refMsg = lang === 'hi'
-                    ? `🤝 *दोस्तों को आमंत्रित करें और पैसे कमाएं*\n\nअपने दोस्तों के साथ अपना लिंक शेयर करें। जब वे बॉट स्टार्ट करेंगे, तो यह यहाँ ट्रैक हो जाएगा!\n\n💸 *रेफरल इनाम:*\n• आपको हर इनवाइट पर *20 INR* मिलेंगे।\n• जब आपके रेफरल अकाउंट में *1000 INR* हो जाएंगे, तो आप इसे अपने 1x अकाउंट में फ्रीबेट के रूप में निकाल सकते हैं!\n\n👥 *आपके रेफरल:* ${user.referralsCount} यूज़र्स\n💰 *आपका बैलेंस:* ${referralBalance} INR\n\n🔗 *आपका अनोखा लिंक:*\n\`${refLink}\`\n\n*(कॉपी करने के लिए ऊपर दिए गए लिंक पर टैप करें!)*`
-                    : `🤝 *Invite Friends & Track Referrals*\n\nShare your unique link with friends. When they start the bot, it will be tracked here!\n\n💸 *Referral Rewards:*\n• You get *20 INR* for every person you invite.\n• Once you reach *1000 INR* in your referral account, you can withdraw that amount to your 1x account as a Freebet!\n\n👥 *Your Referrals:* ${user.referralsCount} users\n💰 *Your Balance:* ${referralBalance} INR\n\n🔗 *Your Unique Link:*\n\`${refLink}\`\n\n*(Tap the link above to copy it!)*`;
+                    ? `🤝 *दोस्तों को आमंत्रित करें और पैसे कमाएं*\n\nअपने दोस्तों के साथ अपना लिंक शेयर करें। जब वे बॉट स्टार्ट करेंगे, तो यह यहाँ ट्रैक हो जाएगा!\n\n💸 *रेफरल इनाम:*\n• आपको हर इनवाइट पर *20 INR* मिलेंगे।\n• जब आपके रेफरल अकाउंट में *1000 INR* हो जाएंगे, तो आप इसे अपने 1x अकाउंट में बोनस के रूप में निकाल सकते हैं!\n\n👥 *आपके रेफरल:* ${user.referralsCount} यूज़र्स\n💰 *आपका बैलेंस:* ${referralBalance} INR\n\n🔗 *आपका अनोखा लिंक:*\n\`${refLink}\`\n\n*(कॉपी करने के लिए ऊपर दिए गए लिंक पर टैप करें!)*`
+                    : `🤝 *Invite Friends & Track Referrals*\n\nShare your unique link with friends. When they start the bot, it will be tracked here!\n\n💸 *Referral Rewards:*\n• You get *20 INR* for every person you invite.\n• Once you reach *1000 INR* in your referral account, you can withdraw that amount to your 1x account as a Bonus!\n\n👥 *Your Referrals:* ${user.referralsCount} users\n💰 *Your Balance:* ${referralBalance} INR\n\n🔗 *Your Unique Link:*\n\`${refLink}\`\n\n*(Tap the link above to copy it!)*`;
                 
                 await bot.sendMessage(chatId, refMsg, { parse_mode: 'Markdown' });
                 break;
 
-            // HOW TO REGISTER
             case '📝 How to Register':
             case '📝 रजिस्टर कैसे करें':
                 const regText = lang === 'hi'
@@ -298,7 +305,6 @@ bot.on('message', async (msg) => {
 
                 await bot.sendMessage(chatId, regText, { parse_mode: 'Markdown' });
                 
-                // UPDATED VIDEO SENDING LOGIC
                 try {
                     const videoPath = path.join(__dirname, 'register-video.mp4'); 
                     await bot.sendVideo(chatId, videoPath, {
@@ -318,7 +324,6 @@ bot.on('message', async (msg) => {
                 await bot.sendMediaGroup(chatId, regMediaGroup);
                 break;
 
-            // HOW TO DEPOSIT
             case '💳 How to Deposit':
             case '💳 डिपॉजिट कैसे करें':
                 const depText = lang === 'hi'
@@ -335,7 +340,6 @@ bot.on('message', async (msg) => {
                 await bot.sendMessage(chatId, `📺 *Deposit Video Guide:* ${VIDEO_PLACEHOLDER}`, { parse_mode: 'Markdown' });
                 break;
 
-            // PROMO CODE
             case '🏷 Activate Promo Code':
             case '🏷 प्रोमो कोड एक्टिवेट करें':
                 const promoText = lang === 'hi'
@@ -351,7 +355,6 @@ bot.on('message', async (msg) => {
                 await bot.sendMediaGroup(chatId, promoMediaGroup);
                 break;
 
-            // UNDER CONSTRUCTION MENUS
             case '🎁 Welcome Bonus':
             case '🎁 वेलकम बोनस':
                 bot.sendMessage(chatId, lang === 'hi' 
