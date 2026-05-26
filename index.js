@@ -71,7 +71,8 @@ function getMainMenu(lang) {
                 keyboard: [
                     ['🎁 वेलकम बोनस', '📝 रजिस्टर कैसे करें'],
                     ['💳 डिपॉजिट कैसे करें', '🏷 प्रोमो कोड एक्टिवेट करें'],
-                    ['🌐 भाषा (Language)', '📞 सहायता (Support)']
+                    ['🔗 बॉट शेयर करें', '🌐 भाषा (Language)'],
+                    ['📞 सहायता (Support)']
                 ],
                 resize_keyboard: true,
                 is_persistent: true
@@ -83,7 +84,8 @@ function getMainMenu(lang) {
             keyboard: [
                 ['🎁 Welcome Bonus', '📝 How to Register'],
                 ['💳 How to Deposit', '🏷 Activate Promo Code'],
-                ['🌐 Language', '📞 Support']
+                ['🔗 Share Bot', '🌐 Language'],
+                ['📞 Support']
             ],
             resize_keyboard: true,
             is_persistent: true
@@ -279,6 +281,36 @@ bot.on('message', async (msg) => {
                     }
                 };
                 bot.sendMessage(chatId, langPrompt, langKeyboard);
+                break;
+
+            case '🔗 Share Bot':
+            case '🔗 बॉट शेयर करें':
+                const botLink = `https://t.me/${botUsername}`;
+                const shareText = lang === 'hi'
+                    ? `🔗 *इस बॉट को शेयर करें*\n\nअपने दोस्तों को इस हेल्पफुल बॉट के बारे में बताएं!\n\n👇 *कॉपी करने के लिए नीचे दिए गए लिंक पर टैप करें:*\n\`${botLink}\``
+                    : `🔗 *Share This Bot*\n\nLet your friends know about this helpful bot!\n\n👇 *Tap the link below to copy it:*\n\`${botLink}\``;
+
+                const shareOptions = {
+                    parse_mode: 'Markdown',
+                    reply_markup: {
+                        inline_keyboard: [
+                            [
+                                { 
+                                    text: lang === 'hi' ? '📋 लिंक कॉपी करें' : '📋 Copy Link', 
+                                    copy_text: { text: botLink } 
+                                }
+                            ],
+                            [
+                                { 
+                                    text: lang === 'hi' ? '📤 दोस्तों के साथ शेयर करें' : '📤 Share with Friends', 
+                                    url: `https://t.me/share/url?url=${botLink}&text=Check%20out%20this%20helpful%20bot!` 
+                                }
+                            ]
+                        ]
+                    }
+                };
+                
+                await bot.sendMessage(chatId, shareText, shareOptions);
                 break;
 
             case '📝 How to Register':
