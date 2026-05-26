@@ -2,6 +2,7 @@ require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const mongoose = require('mongoose');
 const fs = require('fs');
+const path = require('path'); // Added path module
 
 // Define User Schema & Model (ADDED: language field)
 const userSchema = new mongoose.Schema({
@@ -297,8 +298,10 @@ bot.on('message', async (msg) => {
 
                 await bot.sendMessage(chatId, regText, { parse_mode: 'Markdown' });
                 
+                // UPDATED VIDEO SENDING LOGIC
                 try {
-                    await bot.sendVideo(chatId, fs.createReadStream('./Untitled design (5).mp4'), {
+                    const videoPath = path.join(__dirname, 'register-video.mp4'); 
+                    await bot.sendVideo(chatId, videoPath, {
                         caption: lang === 'hi' ? '📺 *वीडियो ट्यूटोरियल: रजिस्टर कैसे करें*' : '📺 *Video Tutorial: How to Register Step-by-Step*',
                         parse_mode: 'Markdown'
                     });
