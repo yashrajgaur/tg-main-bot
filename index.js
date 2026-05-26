@@ -333,17 +333,12 @@ bot.on('message', async (msg) => {
                 await bot.sendMessage(chatId, regText, { parse_mode: 'Markdown' });
                 
                 try {
-                    // 👇 PASTE YOUR FILE ID HERE ONCE YOU HAVE IT
-                    const videoFileId = 'PASTE_FILE_ID_HERE'; 
+                    const videoFileId = 'BAACAgUAAxkBAAIE1GoVb3_9ayL2ZqKxf0fFp9golylwAAL0IQACpIqoVFZFXzW_9BVBOwQ'; 
                     
-                    if (videoFileId !== 'PASTE_FILE_ID_HERE') {
-                        await bot.sendVideo(chatId, videoFileId, {
-                            caption: lang === 'hi' ? '📺 *वीडियो ट्यूटोरियल: रजिस्टर कैसे करें*' : '📺 *Video Tutorial: How to Register Step-by-Step*',
-                            parse_mode: 'Markdown'
-                        });
-                    } else {
-                        await bot.sendMessage(chatId, `📺 *Prefer a video tutorial?* Watch it here: ${VIDEO_PLACEHOLDER}\n_(Note: Video File ID needs to be added to code)_`, { parse_mode: 'Markdown' });
-                    }
+                    await bot.sendVideo(chatId, videoFileId, {
+                        caption: lang === 'hi' ? '📺 *वीडियो ट्यूटोरियल: रजिस्टर कैसे करें*' : '📺 *Video Tutorial: How to Register Step-by-Step*',
+                        parse_mode: 'Markdown'
+                    });
                 } catch (videoErr) {
                     console.error("❌ Error sending registration video via File ID:", videoErr.message);
                     await bot.sendMessage(chatId, `📺 *Prefer a video tutorial?* Watch it here: ${VIDEO_PLACEHOLDER}`, { parse_mode: 'Markdown' });
@@ -360,7 +355,7 @@ bot.on('message', async (msg) => {
             case '💳 How to Deposit':
             case '💳 डिपॉजिट कैसे करें':
                 const depText = lang === 'hi'
-                    ? `💳 *डिपॉजिट कैसे करें*\n\nहम कई सुरक्षित पेमेंट तरीके सपोर्ट करते हैं:\n✅ UPI\n✅ Paytm\n✅ Crypto\n✅ Net Banking\n✅ Bank Cards\n\n💡 *याद रखें!* अगर आपने रजिस्ट्रेशन के समय \`${PROMO_CODE}\` इस्तेमाल किया है, तो आपके पहले डिपॉजिट पर बड़ा वेलकम बोनस मिलेगा!\n\n*अकाउंट में पैसे डालने के लिए नीचे दिए गए स्टेप्स फॉलो करें:* 👇`
+                    ? `💳 *डिपॉजिट कैसे करें*\n\nहम कई सुरक्षित पेमेंट तरीके सपोर्ट বৃহত্তর:\n✅ UPI\n✅ Paytm\n✅ Crypto\n✅ Net Banking\n✅ Bank Cards\n\n💡 *याद रखें!* अगर आपने रजिस्ट्रेशन के समय \`${PROMO_CODE}\` इस्तेमाल किया है, तो आपके पहले डिपॉजिट पर बड़ा वेलकम बोनस मिलेगा!\n\n*अकाउंट में पैसे डालने के लिए नीचे दिए गए स्टेप्स फॉलो करें:* 👇`
                     : `💳 *How to Make a Deposit*\n\nWe support multiple fast and secure payment methods:\n✅ UPI\n✅ Paytm\n✅ Crypto\n✅ Net Banking\n✅ Bank Cards\n\n💡 *Don't Forget!* If you used promo code \`${PROMO_CODE}\` during registration, your first deposit will be heavily matched with a welcome bonus!\n\n*Follow the screenshot cards below to fund your account:* 👇`;
 
                 await bot.sendMessage(chatId, depText, { parse_mode: 'Markdown' });
