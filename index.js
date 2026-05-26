@@ -323,10 +323,20 @@ bot.on('message', async (msg) => {
                 
                 try {
                     const videoPath = path.join(__dirname, 'register-video.mp4'); 
-                    await bot.sendVideo(chatId, videoPath, {
+                    
+                    // Added File Check
+                    if (!fs.existsSync(videoPath)) {
+                        throw new Error(`Local file not found at ${videoPath}`);
+                    }
+
+                    // Replaced raw path with ReadStream to prevent buffer issues
+                    const videoStream = fs.createReadStream(videoPath);
+                    
+                    await bot.sendVideo(chatId, videoStream, {
                         caption: lang === 'hi' ? '📺 *वीडियो ट्यूटोरियल: रजिस्टर कैसे करें*' : '📺 *Video Tutorial: How to Register Step-by-Step*',
                         parse_mode: 'Markdown'
-                    });
+                    }, { filename: 'register-video.mp4', contentType: 'video/mp4' }); // Added explicitly for node-telegram-bot-api streams
+                    
                 } catch (videoErr) {
                     console.error("❌ Error sending registration video:", videoErr.message);
                     await bot.sendMessage(chatId, `📺 *Prefer a video tutorial?* Watch it here: ${VIDEO_PLACEHOLDER}`, { parse_mode: 'Markdown' });
