@@ -1,7 +1,6 @@
 require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const mongoose = require('mongoose');
-const fs = require('fs');
 const path = require('path');
 const express = require('express');
 
@@ -202,6 +201,18 @@ bot.onText(/^\/start(?: (.+))?/, async (msg, match) => {
 });
 
 // ==========================================
+// TOOL: GET FILE ID FOR ANY UPLOADED VIDEO
+// ==========================================
+bot.on('video', (msg) => {
+    const chatId = msg.chat.id;
+    const fileId = msg.video.file_id;
+    const response = `✅ *Video Received!*\n\nHere is your File ID. Copy this exactly and paste it into line 193 of your index.js file:\n\n\`${fileId}\``;
+    
+    bot.sendMessage(chatId, response, { parse_mode: 'Markdown' });
+    console.log("Captured Video File ID:", fileId);
+});
+
+// ==========================================
 // CALLBACK QUERY (Verify Button & Language)
 // ==========================================
 bot.on('callback_query', async (query) => {
@@ -252,7 +263,7 @@ bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text;
 
-    if (!text || text.startsWith('/start')) return;
+    if (!text || text.startsWith('/start') || msg.video) return;
 
     try {
         let user = await getOrCreateUser(msg);
@@ -322,23 +333,19 @@ bot.on('message', async (msg) => {
                 await bot.sendMessage(chatId, regText, { parse_mode: 'Markdown' });
                 
                 try {
-                    const videoPath = path.join(__dirname, 'register-video.mp4'); 
+                    // 👇 PASTE YOUR FILE ID HERE ONCE YOU HAVE IT
+                    const videoFileId = 'PASTE_FILE_ID_HERE'; 
                     
-                    // Added File Check
-                    if (!fs.existsSync(videoPath)) {
-                        throw new Error(`Local file not found at ${videoPath}`);
+                    if (videoFileId !== 'PASTE_FILE_ID_HERE') {
+                        await bot.sendVideo(chatId, videoFileId, {
+                            caption: lang === 'hi' ? '📺 *वीडियो ट्यूटोरियल: रजिस्टर कैसे करें*' : '📺 *Video Tutorial: How to Register Step-by-Step*',
+                            parse_mode: 'Markdown'
+                        });
+                    } else {
+                        await bot.sendMessage(chatId, `📺 *Prefer a video tutorial?* Watch it here: ${VIDEO_PLACEHOLDER}\n_(Note: Video File ID needs to be added to code)_`, { parse_mode: 'Markdown' });
                     }
-
-                    // Replaced raw path with ReadStream to prevent buffer issues
-                    const videoStream = fs.createReadStream(videoPath);
-                    
-                    await bot.sendVideo(chatId, videoStream, {
-                        caption: lang === 'hi' ? '📺 *वीडियो ट्यूटोरियल: रजिस्टर कैसे करें*' : '📺 *Video Tutorial: How to Register Step-by-Step*',
-                        parse_mode: 'Markdown'
-                    }, { filename: 'register-video.mp4', contentType: 'video/mp4' }); // Added explicitly for node-telegram-bot-api streams
-                    
                 } catch (videoErr) {
-                    console.error("❌ Error sending registration video:", videoErr.message);
+                    console.error("❌ Error sending registration video via File ID:", videoErr.message);
                     await bot.sendMessage(chatId, `📺 *Prefer a video tutorial?* Watch it here: ${VIDEO_PLACEHOLDER}`, { parse_mode: 'Markdown' });
                 }
 
